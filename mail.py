@@ -1,5 +1,5 @@
 from commandparser import CommandParser
-from maillist_factory import MailListFactory
+from maillist import MailList
 from maillist_file_adapter import MailListFileAdapter
 from glob import glob
 from os.path import basename
@@ -21,7 +21,7 @@ class MailListProgram():
     def create_list_callback(self, arguments):
         name = " ".join(arguments)
 
-        maillist = self.factory.create(name)
+        maillist = MailList(-1, name)
         maillist_adapter = MailListFileAdapter(self.db_path, maillist)
         maillist_adapter.save()
 
