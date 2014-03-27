@@ -4,19 +4,44 @@ from maillist_file_adapter import MailListFileAdapter
 from glob import glob
 from os.path import basename
 import sys
+import sqlite3
 
 
 class MailListProgram():
     """docstring for MailListProgram"""
     def __init__(self):
-        self.factory = MailListFactory()
+        #self.factory = MailListFactory()
         self.cp = CommandParser()
         self.lists = {}
+
+    # --- DATABASE hendeling  ---
         self.db_path = "lists/"
+        self.db_name = "database.db"
+        self.db_conn = None  # keeps the connection to the database
+
+        self.db_maillists = " maillsits (id INTEGER PRIMERY KEY, name text"
+        self.db_subsrcibers = " subscribers (id INTEGER PRIMERY KEY," +\
+                              "name text, email text)"
+        self.db_list_to_subs = " list_to_subscribers (list_id int," +\
+                               " subscribers_id int)"
+
+        self.__ensure_database()
+    # --- End Database handeling ---
 
         self._load_initial_state()
         self._init_callbacks()
         self._loop()
+
+    def __ensure_database(self):
+        self.db_conn = sqlite3.connect(self.db_path + self.db_name)
+        command = "CREATE TABLE IF NOT EXISTS"
+
+      # Lists all the tables
+        list_of_tables = [self.db_maillist,
+                          self.db_subsrcibers, self.db_list_to_subs]
+      # Creates all the tables of the database
+        for table in list_of_tables:
+            self.db_conn.execute(command + table)
 
     def create_list_callback(self, arguments):
         name = " ".join(arguments)
