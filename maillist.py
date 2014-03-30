@@ -1,15 +1,16 @@
+from subscriber import Subscriber
 class MailList():
     """docstring for MailList"""
     def __init__(self, list_id, name):
         self.__name = name
         self.__id = list_id
-        self.subscribers = {}
+        self.subscribers = []
 
     def add_subscriber(self, name, email):
-        if email in self.subscribers:
+        if email in [subs.get_email() for subs in self.subscribers]:
             return False
 
-        self.subscribers[email] = name
+        self.subscribers.append(Subscriber(name, email))
         return True
 
     def get_name(self):
@@ -19,30 +20,32 @@ class MailList():
         return len(self.subscribers)
 
     def get_subscriber_by_email(self, email):
-        if email in self.subscribers:
-            return (self.subscribers[email], email)
+        subscriber = [subs for subs in self.subscribers
+                if subs.get_email() == email]
+        if len(subscriber) != 0:
+            return subscriber
 
         return None
 
     def get_subscribers(self):
-        result = []
-        for email in self.subscribers:
-            result.append((self.subscribers[email], email))
-        return result
+        return self.subscribers
 
     def update_subscriber(self, email, update_hash):
-        if "email" in update_hash:
-            name = self.subscribers[email]
-            self.subscribers[update_hash["email"]] = name
-            del self.subscribers[email]
-            email = update_hash["email"]
-
         if "name" in update_hash:
-            self.subscribers[email] = update_hash["name"]
+            [s.update_subscriber(update_hash["name"], s.get_email())
+                    for s in self.subscribers if s.get_email() == email]
+
+        if "email" in update_hash:
+            [s.update_subscriber(s.get_name(), update_hash["email"])
+                    for s in self.subscribers if s.get_email() == email]
+
 
     def remove_subscriber(self, email):
-        if email in self.subscribers:
-            del self.subscribers[email]
+        #if email in self.subscribers:
+            #del self.subscribers[email]
+
+        [self.subscribers.pop(i) for i in range(len(self.subscribers))
+                if self.subscribers[i].get_email() == email]
 
         return None
 
