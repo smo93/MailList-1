@@ -21,7 +21,9 @@ class MailListTest(unittest.TestCase):
         self.m.add_subscriber("Rado", "radorado@hackbulgaria.com")
 
         expected = [("Rado", "radorado@hackbulgaria.com")]
-        self.assertEqual(expected, self.m.get_subscribers())
+        actual = [(s.get_name(), s.get_email())
+                for s in self.m.get_subscribers()]
+        self.assertEqual(expected, actual)
 
     def test_get_id(self):
         self.assertEqual(1, self.m.get_id())
@@ -44,14 +46,16 @@ class MailListTest(unittest.TestCase):
         self.assertEqual(1, self.m.count())
         self.assertTrue(add1)
         self.assertFalse(add2)
+        result = self.m.get_subscriber_by_email(subscriber_email)
         self.assertEqual(("Rado", subscriber_email),
-                         self.m.get_subscriber_by_email(subscriber_email))
+                (result[0].get_name(), result[0].get_email()))
 
     def test_add_get_subscriber_by_email(self):
         self.m.add_subscriber("Rado", "radorado@hackbulgaria.com")
 
         result = self.m.get_subscriber_by_email("radorado@hackbulgaria.com")
-        self.assertEqual(("Rado", "radorado@hackbulgaria.com"), result)
+        self.assertEqual(("Rado", "radorado@hackbulgaria.com"),
+                (result[0].get_name(), result[0].get_email()))
 
     def test_add_get_subscriber_by_email_when_not_there(self):
         self.assertIsNone(self.m.get_subscriber_by_email("asd@asd.com"))
@@ -61,16 +65,18 @@ class MailListTest(unittest.TestCase):
         self.m.update_subscriber("rado@rado.com",
                                  {"name": "Radoslav Georgiev"})
 
+        result = self.m.get_subscriber_by_email("rado@rado.com")
         self.assertEqual("Radoslav Georgiev",
-                         self.m.get_subscriber_by_email("rado@rado.com")[0])
+                         result[0].get_name())
 
     def test_update_subscriber_changing_email(self):
         self.m.add_subscriber("Rado rado", "rado@rado.com")
         self.m.update_subscriber("rado@rado.com",
                                  {"email": "radorado@rado.com"})
 
+        result = self.m.get_subscriber_by_email("radorado@rado.com")
         self.assertEqual(("Rado rado", "radorado@rado.com"),
-                         self.m.get_subscriber_by_email("radorado@rado.com"))
+                        (result[0].get_name(), result[0].get_email()))
 
     def test_update_subscriber_changing_name_and_email(self):
         self.m.add_subscriber("Rado rado", "rado@rado.com")
@@ -78,8 +84,9 @@ class MailListTest(unittest.TestCase):
                                  {"name": "Radoslav Georgiev",
                                   "email": "radorado@rado.com"})
 
+        result = self.m.get_subscriber_by_email("radorado@rado.com")
         self.assertEqual(("Radoslav Georgiev", "radorado@rado.com"),
-                         self.m.get_subscriber_by_email("radorado@rado.com"))
+                         (result[0].get_name(), result[0].get_email()))
 
     def test_remove_subscriber(self):
         self.m.add_subscriber("Rado rado", "rado@rado.com")
@@ -89,3 +96,6 @@ class MailListTest(unittest.TestCase):
 
     def test_remove_subscriber_when_not_there(self):
         self.assertIsNone(self.m.remove_subscriber("rado@radorado.com"))
+
+if __name__ == '__main__':
+    unittest.main()
