@@ -4,8 +4,8 @@ import os, sqlite3
 
 class MailListFileAdapter():
     """docstring for MailListFileAdapter"""
-    def __init__(self, db_path, mail_list=None):
-        self.db_path = db_path
+    def __init__(self, db_conn, mail_list=None):
+        self.db_conn = db_conn
         self.mail_list = mail_list
         #self._ensure_db_path()
         self._ensure_db_exists()
@@ -23,6 +23,15 @@ class MailListFileAdapter():
 
         return sorted(subscribers)
 
+    def _save_maillist(self):
+        pass
+
+    def _save_subscribers(self):
+        pass
+
+    def _save_relation(self, list_id, subscriber_id):
+        pass
+
     def save(self):
         #file_to_save = open(self.get_file_path(), "w")
         #contents = "{}\n".format(self.mail_list.get_id())
@@ -30,25 +39,10 @@ class MailListFileAdapter():
 
         #file_to_save.write(contents)
         #file_to_save.close()
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
 
-        maillist_exists = 'SELECT id FROM maillists WHERE id=?'
-        ml = cursor.execute(maillist_exists, (self.mail_list.get_id(), )).\
-                fetchall()
-        if len(ml) == 0:
-            add_maillist = 'INSERT INTO maillists VALUES(?, ?)'
-            cursor.execute(add_maillist, (self.mail_list.get_id(),\
-                    self.mail_list.get_name()))
+        _save_maillist()
 
-        for s in self.mail_list.get_subscribers():
-            get_s_id = 'SELECT id FROM subscribers WHERE email=?'
-            s_row = cursor.execute().fetchone()
-            if s_row == None:
-                last_id = cursor.execute('SELECT * FROM tablename ORDER BY '\
-                        'column DESC LIMIT 1').fetchone()[0]
-                add_sql = 'INSERT INTO subscribers VALUES'
-
+        _save_subscribers()
 
     def load(self, file_name):
         maillist_name = file_name.replace("_", " ")
@@ -76,15 +70,4 @@ class MailListFileAdapter():
     def _ensure_db_path(self):
         if not os.path.exists(self.db_path):
             os.makedirs(self.db_path)
-
-    def _ensure_db_exists(self):
-        if not os.path.isfile(self.db_path):
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            sql = 'CREATE TABLE maillists(id int, name text);'\
-                    'CREATE TABLE subscribers(id int, name text, email text);'\
-                    'CREATE TABLE list_to_subscriber(list_id int, '\
-                    'subscriber_id int)'
-            cursor.execute(sql)
-            conn.close()
 
